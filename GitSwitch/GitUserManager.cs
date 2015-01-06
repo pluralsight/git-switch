@@ -19,11 +19,16 @@ namespace GitSwitch
 
         public void AddUser(GitUser gitUser)
         {
-            // TODO: Validate the gitUser and set the ssh key hash.
+            ValidateGitUser(gitUser);
             if (!users.Contains(gitUser))
             {
                 users.Add(gitUser);
             }
+        }
+
+        private void ValidateGitUser(GitUser gitUser)
+        {
+            gitUser.SshKeyHash = FileHasher.HashFile(gitUser.SshKeyPath);
         }
 
         public GitUser GetUserByUsername(string username)

@@ -51,6 +51,7 @@
     <Compile Include="EditUsersForm.Designer.cs">
       <DependentUpon>EditUsersForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FileHasher.cs" />
     <Compile Include="GitUser.cs" />
     <Compile Include="GitUserManager.cs" />
     <Compile Include="Program.cs" />
