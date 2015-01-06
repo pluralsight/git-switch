@@ -54,8 +54,10 @@
     <Compile Include="FileHasher.cs" />
     <Compile Include="GitUser.cs" />
     <Compile Include="GitUserManager.cs" />
+    <Compile Include="ISerializer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serializer.cs" />
     <EmbeddedResource Include="EditUsersForm.resx">
       <DependentUpon>EditUsersForm.cs</DependentUpon>
     </EmbeddedResource>

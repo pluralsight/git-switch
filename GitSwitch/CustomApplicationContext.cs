@@ -17,7 +17,7 @@ namespace GitSwitch
         public CustomApplicationContext()
         {
             InitializeTrayIcon();
-            gitUserManager = new GitUserManager();
+            gitUserManager = new GitUserManager(new Serializer());
         }
 
         private void InitializeTrayIcon()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,14 @@ namespace GitSwitch
     {
         private const string GitUserFile = "gitusers.xml";
 
+        private ISerializer serializer = new Serializer();
         private List<GitUser> users = new List<GitUser>();
+
+        public GitUserManager(ISerializer serializer)
+        {
+            this.serializer = serializer;
+            LoadFromFile();
+        }
 
         public List<GitUser> GetUsers()
         {
@@ -24,6 +32,7 @@ namespace GitSwitch
             {
                 users.Add(gitUser);
             }
+            SaveToFile();
         }
 
         private void ValidateGitUser(GitUser gitUser)
@@ -39,6 +48,24 @@ namespace GitSwitch
         public void RemoveUser(GitUser gitUser)
         {
             users.Remove(gitUser);
+            SaveToFile();
+        }
+
+        private void SaveToFile()
+        {
+            serializer.Write(GitUserFile, users);
+        }
+
+        private void LoadFromFile()
+        {
+            try
+            {
+                users = serializer.Read<List<GitUser>>(GitUserFile);
+            }
+            catch (FileNotFoundException)
+            {
+                // Could not load from file; so we just have an empty users list.
+            }
         }
     }
 }
