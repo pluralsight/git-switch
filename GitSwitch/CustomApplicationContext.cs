@@ -11,10 +11,12 @@ namespace GitSwitch
     class CustomApplicationContext : ApplicationContext
     {
         private NotifyIcon notifyIcon;
+        private GitUserManager gitUserManager;
 
         public CustomApplicationContext()
         {
             InitializeTrayIcon();
+            gitUserManager = new GitUserManager();
         }
 
         private void InitializeTrayIcon()
@@ -34,6 +36,8 @@ namespace GitSwitch
             e.Cancel = false;
 
             notifyIcon.ContextMenuStrip.Items.Clear();
+            gitUserManager.GetUsers().ForEach(x => notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler(x.Username, OnGitUserClick)));
+            notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Add User...", OnAddUser));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", onExit));
@@ -47,6 +51,12 @@ namespace GitSwitch
             item.ToolTipText = tooltipText;
            
             return item;
+        }
+
+        private void OnGitUserClick(object sender, EventArgs e)
+        {
+            // TODO: Set the user.
+            string username = sender.ToString();
         }
 
         private void OnAddUser(object sender, EventArgs e)
