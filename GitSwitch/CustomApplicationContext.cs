@@ -12,6 +12,7 @@ namespace GitSwitch
     {
         private NotifyIcon notifyIcon;
         private GitUserManager gitUserManager;
+        private EditUsersForm editUsersForm;
 
         public CustomApplicationContext()
         {
@@ -38,9 +39,9 @@ namespace GitSwitch
             notifyIcon.ContextMenuStrip.Items.Clear();
             gitUserManager.GetUsers().ForEach(x => notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler(x.Username, OnGitUserClick)));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Add User...", OnAddUser));
+            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Edit Users...", OnEditUsers));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", onExit));
+            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", OnExit));
         }
 
         private ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler, string tooltipText = null)
@@ -59,12 +60,26 @@ namespace GitSwitch
             string username = sender.ToString();
         }
 
-        private void OnAddUser(object sender, EventArgs e)
+        private void OnEditUsers(object sender, EventArgs e)
         {
-            // TODO: Show the form to add a new user.
+            if (editUsersForm == null)
+            {
+                editUsersForm = new EditUsersForm(gitUserManager);
+                editUsersForm.Closed += OnCloseEditUsersForm;
+                editUsersForm.Show();
+            }
+            else
+            {
+                editUsersForm.Activate();
+            }
         }
 
-        private void onExit(object sender, EventArgs e)
+        private void OnCloseEditUsersForm(object sender, EventArgs e)
+        {
+            editUsersForm = null;
+        }
+
+        private void OnExit(object sender, EventArgs e)
         {
             ExitThread();
         }

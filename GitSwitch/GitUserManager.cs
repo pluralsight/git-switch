@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GitSwitch
 {
-    class GitUserManager
+    public class GitUserManager
     {
         private const string GitUserFile = "gitusers.xml";
 
@@ -15,6 +15,25 @@ namespace GitSwitch
         public List<GitUser> GetUsers()
         {
             return users;
+        }
+
+        public void AddUser(GitUser gitUser)
+        {
+            // TODO: Validate the gitUser and set the ssh key hash.
+            if (!users.Contains(gitUser))
+            {
+                users.Add(gitUser);
+            }
+        }
+
+        public GitUser GetUserByUsername(string username)
+        {
+            return users.FirstOrDefault(x => x.Username == username);
+        }
+
+        public void RemoveUser(GitUser gitUser)
+        {
+            users.Remove(gitUser);
         }
     }
 }

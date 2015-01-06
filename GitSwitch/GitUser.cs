@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GitSwitch
 {
-    class GitUser
+    public class GitUser
     {
         public string Username { get; set; }
         public string Email { get; set; }
