@@ -36,5 +36,15 @@ namespace GitSwitch
                 serializer.Serialize(writer, TInput);
             }
         }
+
+        public IEnumerable<string> ReadLines(string filePath)
+        {
+            return File.ReadLines(filePath);
+        }
+
+        public void WriteLinesUnixStyle(string filePath, IEnumerable<string> lines)
+        {
+            File.WriteAllText(filePath, string.Join("\n", lines));
+        }
     }
 }
