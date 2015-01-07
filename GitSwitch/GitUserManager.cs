@@ -9,14 +9,16 @@ namespace GitSwitch
 {
     public class GitUserManager
     {
-        private const string GitUserFile = "gitusers.xml";
+        public const string GitUserFile = "gitusers.xml";
 
-        private ISerializer serializer = new Serializer();
+        private ISerializer serializer;
+        private IFileHasher fileHasher;
         private List<GitUser> users = new List<GitUser>();
 
-        public GitUserManager(ISerializer serializer)
+        public GitUserManager(ISerializer serializer, IFileHasher fileHasher)
         {
             this.serializer = serializer;
+            this.fileHasher = fileHasher;
             LoadFromFile();
         }
 
@@ -37,7 +39,7 @@ namespace GitSwitch
 
         private void ValidateGitUser(GitUser gitUser)
         {
-            gitUser.SshKeyHash = FileHasher.HashFile(gitUser.SshKeyPath);
+            gitUser.SshKeyHash = fileHasher.HashFile(gitUser.SshKeyPath);
         }
 
         public GitUser GetUserByUsername(string username)

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace GitSwitch
 {
-    class FileHasher
+    public class Sha1FileHasher : IFileHasher
     {
-        public static string HashFile(string filePath)
+        public string HashFile(string filePath)
         {
             using (FileStream stream = File.OpenRead(filePath))
             {
@@ -20,7 +20,7 @@ namespace GitSwitch
             }
         }
 
-        public static bool IsHashCorrectForFile(string hash, string filePath)
+        public bool IsHashCorrectForFile(string hash, string filePath)
         {
             return hash.ToLower() == HashFile(filePath);
         }
