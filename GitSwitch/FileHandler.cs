@@ -9,9 +9,9 @@ using System.Xml.Serialization;
 
 namespace GitSwitch
 {
-    public class Serializer : ISerializer
+    public class FileHandler : IFileHandler
     {
-        public T Read<T>(string filePath)
+        public T DeserializeFromFile<T>(string filePath)
         {
             var settings = new XmlReaderSettings
             {
@@ -27,7 +27,7 @@ namespace GitSwitch
             }
         }
 
-        public void Write<T>(string filePath, T TInput)
+        public void SerializeToFile<T>(string filePath, T TInput)
         {
             var serializer = new XmlSerializer(typeof(T));
 

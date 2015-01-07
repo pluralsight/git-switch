@@ -11,11 +11,11 @@ namespace GitSwitch
     {
         public const string GitUserFile = "gitusers.xml";
 
-        private ISerializer serializer;
+        private IFileHandler serializer;
         private IFileHasher fileHasher;
         private List<GitUser> users = new List<GitUser>();
 
-        public GitUserManager(ISerializer serializer, IFileHasher fileHasher)
+        public GitUserManager(IFileHandler serializer, IFileHasher fileHasher)
         {
             this.serializer = serializer;
             this.fileHasher = fileHasher;
@@ -55,14 +55,14 @@ namespace GitSwitch
 
         private void SaveToFile()
         {
-            serializer.Write(GitUserFile, users);
+            serializer.SerializeToFile(GitUserFile, users);
         }
 
         private void LoadFromFile()
         {
             try
             {
-                users = serializer.Read<List<GitUser>>(GitUserFile);
+                users = serializer.DeserializeFromFile<List<GitUser>>(GitUserFile);
             }
             catch (FileNotFoundException)
             {
