@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GitSwitch
 {
-    public class SshConfigEditor
+    public class SshConfigEditor : ISshConfigEditor
     {
         private IFileHandler fileHandler;
 

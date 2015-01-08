@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GitSwitch
 {
-    public class GitConfigEditor
+    public class GitConfigEditor : IGitConfigEditor
     {
         private IFileHandler fileHandler;
 
