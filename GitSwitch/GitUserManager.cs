@@ -13,12 +13,16 @@ namespace GitSwitch
 
         private IFileHandler serializer;
         private IFileHasher fileHasher;
+        private IGitConfigEditor gitConfigEditor;
+        private ISshConfigEditor sshConfigEditor;
         private List<GitUser> users = new List<GitUser>();
 
-        public GitUserManager(IFileHandler serializer, IFileHasher fileHasher)
+        public GitUserManager(IFileHandler serializer, IFileHasher fileHasher, IGitConfigEditor gitConfigEditor, ISshConfigEditor sshConfigEditor)
         {
             this.serializer = serializer;
             this.fileHasher = fileHasher;
+            this.gitConfigEditor = gitConfigEditor;
+            this.sshConfigEditor = sshConfigEditor;
             LoadFromFile();
         }
 
@@ -67,6 +71,25 @@ namespace GitSwitch
             catch (FileNotFoundException)
             {
                 // Could not load from file; so we just have an empty users list.
+            }
+        }
+
+        public void ConfigureForUser(string username)
+        {
+            ConfigureForUser(GetUserByUsername(username));
+        }
+
+        private void ConfigureForUser(GitUser user)
+        {
+            if (user == null)
+            {
+                throw new InvalidUserException();
+            }
+            gitConfigEditor.SetGitUsernameAndEmail(user.Username, user.Email);
+            sshConfigEditor.SetGitHubKeyFile(user.SshKeyPath);
+            if (!fileHasher.IsHashCorrectForFile(user.SshKeyHash, user.SshKeyPath))
+            {
+                throw new SshKeyHashException();
             }
         }
     }

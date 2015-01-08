@@ -17,7 +17,8 @@ namespace GitSwitch
         public CustomApplicationContext()
         {
             InitializeTrayIcon();
-            gitUserManager = new GitUserManager(new FileHandler(), new Sha1FileHasher());
+            var fileHandler = new FileHandler();
+            gitUserManager = new GitUserManager(fileHandler, new Sha1FileHasher(), new GitConfigEditor(fileHandler), new SshConfigEditor(fileHandler));
         }
 
         private void InitializeTrayIcon()
