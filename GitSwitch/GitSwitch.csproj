@@ -59,6 +59,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FileHandler.cs" />
+    <Compile Include="SshConfigEditor.cs" />
     <EmbeddedResource Include="EditUsersForm.resx">
       <DependentUpon>EditUsersForm.cs</DependentUpon>
     </EmbeddedResource>
