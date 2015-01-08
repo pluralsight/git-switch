@@ -33,43 +33,48 @@ namespace GitSwitch
             try
             {
                 IEnumerable<string> configFileLines = fileHandler.ReadLines(SshConfigFilePath);
-                List<string> output = new List<string>();
-                bool didFindGitHub = false;
-                bool inGitHubSection = false;
-
-                foreach (var line in configFileLines)
-                {
-                    output.Add(line);
-                    if (Regex.IsMatch(line, @"^\s*Host\s+"))
-                    {
-                        inGitHubSection = line.Contains("github.com");
-                        if (inGitHubSection)
-                        {
-                            didFindGitHub = true;
-                            output.Add("\tIdentityFile " + unixSshKeyPath);
-                        }
-                    }
-                    if (inGitHubSection && Regex.IsMatch(line, @"^\s*IdentityFile\s+"))
-                    {
-                        output.RemoveAt(output.Count - 1);
-                    }
-                }
-
-                if (!didFindGitHub)
-                {
-                    if (output[output.Count - 1] != "")
-                    {
-                        output.Add("");
-                    }
-                    output.Add(defaultSshConfig);
-                }
-
-                fileHandler.WriteFile(SshConfigFilePath, string.Join("\n", output));
+                var newSsshConfig = ProcessSshFile(configFileLines, unixSshKeyPath, defaultSshConfig);
+                fileHandler.WriteFile(SshConfigFilePath, newSsshConfig);
             }
             catch (FileNotFoundException)
             {
                 fileHandler.WriteFile(SshConfigFilePath, defaultSshConfig);
             }
+        }
+
+        private static string ProcessSshFile(IEnumerable<string> configFileLines, string unixSshKeyPath, string defaultSshConfig)
+        {
+            List<string> output = new List<string>();
+            bool didFindGitHub = false;
+            bool inGitHubSection = false;
+
+            foreach (var line in configFileLines)
+            {
+                output.Add(line);
+                if (Regex.IsMatch(line, @"^\s*Host\s+"))
+                {
+                    inGitHubSection = line.Contains("github.com");
+                    if (inGitHubSection)
+                    {
+                        didFindGitHub = true;
+                        output.Add("\tIdentityFile " + unixSshKeyPath);
+                    }
+                }
+                if (inGitHubSection && Regex.IsMatch(line, @"^\s*IdentityFile\s+"))
+                {
+                    output.RemoveAt(output.Count - 1);
+                }
+            }
+
+            if (!didFindGitHub)
+            {
+                if (output[output.Count - 1] != "")
+                {
+                    output.Add("");
+                }
+                output.Add(defaultSshConfig);
+            }
+            return string.Join("\n", output);
         }
 
         private string WindowsToUnixPath(string path)

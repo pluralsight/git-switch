@@ -13,10 +13,11 @@ namespace UnitTests
     [TestFixture]
     class SshConfigEditorTests
     {
+        private const string TestKeyWindowsPath = @"C:\Users\fakeuser\.ssh\githubkey";
+        private const string TestKeyUnixPath = @"/C/Users/fakeuser/.ssh/githubkey";
+        
         private SshConfigEditor editor;
         private Mock<IFileHandler> mockFileHandler;
-        private string testKeyWindowsPath = @"C:\Users\fakeuser\.ssh\githubkey";
-        private string testKeyUnixPath = @"/C/Users/fakeuser/.ssh/githubkey";
 
         [SetUp]
         public void SetUp()
@@ -29,7 +30,7 @@ namespace UnitTests
         [Test]
         public void ItWritesANewFileIfOneWasNotFound()
         {
-            string expectedData = "Host github.com\n\tIdentityFile " + testKeyUnixPath + "\n";
+            string expectedData = "Host github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
             
             mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Throws(new FileNotFoundException());
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
@@ -39,7 +40,7 @@ namespace UnitTests
                     Assert.AreEqual(expectedData, data);
                 });
 
-            editor.SetGitHubKeyFile(testKeyWindowsPath);
+            editor.SetGitHubKeyFile(TestKeyWindowsPath);
 
             mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
             mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
@@ -49,7 +50,7 @@ namespace UnitTests
         public void ItAddsTheGitHubEntryIfItWasNotFound()
         {
             List<string> priorConfigLines = GetExampleConfigLines();
-            string expectedData = string.Join("\n", priorConfigLines) + "\nHost github.com\n\tIdentityFile " + testKeyUnixPath + "\n";
+            string expectedData = string.Join("\n", priorConfigLines) + "\nHost github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
             
             mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Returns(priorConfigLines);
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
@@ -59,7 +60,7 @@ namespace UnitTests
                     Assert.AreEqual(expectedData, data);
                 });
 
-            editor.SetGitHubKeyFile(testKeyWindowsPath);
+            editor.SetGitHubKeyFile(TestKeyWindowsPath);
 
             mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
             mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
@@ -69,7 +70,7 @@ namespace UnitTests
         public void ItChangesTheGitHubIdentityFile()
         {
             List<string> priorConfigLines = GetExampleConfigLines("~/.ssh/oldGitHubKey");
-            string expectedData = string.Join("\n", GetExampleConfigLines(testKeyUnixPath));
+            string expectedData = string.Join("\n", GetExampleConfigLines(TestKeyUnixPath));
 
             mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Returns(priorConfigLines);
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
@@ -79,7 +80,7 @@ namespace UnitTests
                     Assert.AreEqual(expectedData, data);
                 });
 
-            editor.SetGitHubKeyFile(testKeyWindowsPath);
+            editor.SetGitHubKeyFile(TestKeyWindowsPath);
 
             mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
             mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
