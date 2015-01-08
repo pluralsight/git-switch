@@ -42,9 +42,9 @@ namespace GitSwitch
             return File.ReadLines(filePath);
         }
 
-        public void WriteLinesUnixStyle(string filePath, IEnumerable<string> lines)
+        public void WriteFile(string filePath, string data)
         {
-            File.WriteAllText(filePath, string.Join("\n", lines));
+            File.WriteAllText(filePath, data);
         }
     }
 }

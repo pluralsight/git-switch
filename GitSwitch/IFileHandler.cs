@@ -7,6 +7,6 @@ namespace GitSwitch
         T DeserializeFromFile<T>(string filePath);
         void SerializeToFile<T>(string filePath, T TInput);
         IEnumerable<string> ReadLines(string filePath);
-        void WriteLinesUnixStyle(string filePath, IEnumerable<string> lines);
+        void WriteFile(string filePath, string data);
     }
 }
