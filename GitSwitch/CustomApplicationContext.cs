@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,8 +58,28 @@ namespace GitSwitch
 
         private void OnGitUserClick(object sender, EventArgs e)
         {
-            // TODO: Set the user.
             string username = sender.ToString();
+            try
+            {
+                gitUserManager.ConfigureForUser(username);
+            }
+            catch (FileNotFoundException)
+            {
+                ShowErrorMessage("SSH key file could not be found at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
+            }
+            catch (SshKeyHashException)
+            {
+                ShowErrorMessage("SSH key file has changed at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
+            }
+            catch (InvalidUserException)
+            {
+                ShowErrorMessage("Error loading user: " + username);
+            }
+        }
+
+        private void ShowErrorMessage(string errorMessage)
+        {
+            MessageBox.Show(errorMessage, "GitSwitch", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void OnEditUsers(object sender, EventArgs e)
