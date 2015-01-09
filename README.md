@@ -17,6 +17,10 @@ For improved security, you can keep your SSH key on a removable drive.
 If the drive letter changes (or if the SSH key file changes for any reason), GitSwitch will warn you about the problem.
 You will need to use the "Edit Users..." option to update the path to your SSH key.
 
+**Important Note:**
+GitSwitch expects your unix home (`~`) folder to be the same as your Windows User Profile folder (e.g. `C:\Users\myuser`).
+If this is not the case, GitSwitch may change config files which are not in use by git/ssh.
+
 
 ## Working on GitSwitch
 
