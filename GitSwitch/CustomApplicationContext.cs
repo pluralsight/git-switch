@@ -14,6 +14,7 @@ namespace GitSwitch
         private NotifyIcon notifyIcon;
         private GitUserManager gitUserManager;
         private EditUsersForm editUsersForm;
+        private HelpForm helpForm;
 
         public CustomApplicationContext()
         {
@@ -43,6 +44,7 @@ namespace GitSwitch
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Edit Users...", OnEditUsers));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Help", OnHelp));
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", OnExit));
         }
 
@@ -99,6 +101,25 @@ namespace GitSwitch
         private void OnCloseEditUsersForm(object sender, EventArgs e)
         {
             editUsersForm = null;
+        }
+
+        private void OnHelp(object sender, EventArgs e)
+        {
+            if (helpForm == null)
+            {
+                helpForm = new HelpForm();
+                helpForm.Closed += OnCloseHelpForm;
+                helpForm.Show();
+            }
+            else
+            {
+                helpForm.Activate();
+            }
+        }
+
+        private void OnCloseHelpForm(object sender, EventArgs e)
+        {
+            helpForm = null;
         }
 
         private void OnExit(object sender, EventArgs e)
