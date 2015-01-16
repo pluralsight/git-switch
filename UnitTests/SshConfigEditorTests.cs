@@ -86,6 +86,27 @@ namespace UnitTests
             mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
         }
 
+        [TestCase("")]
+        [TestCase(null)]
+        public void ItAllowsANullOrEmptySshKeyString(string sshKey)
+        {
+            List<string> priorConfigLines = GetExampleConfigLines("~/.ssh/oldGitHubKey");
+            string expectedData = string.Join("\n", GetExampleConfigLines(""));
+
+            mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Returns(priorConfigLines);
+            mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((path, data) =>
+                {
+                    Assert.AreEqual(editor.SshConfigFilePath, path);
+                    Assert.AreEqual(expectedData, data);
+                });
+
+            editor.SetGitHubKeyFile(sshKey);
+
+            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+        }
+
         private List<string> GetExampleConfigLines(string gitHubKey = null)
         {
             var lines = new List<string>();

@@ -79,6 +79,10 @@ namespace GitSwitch
 
         private string WindowsToUnixPath(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return string.Empty;
+            }
             return Regex.Replace(path.Replace("\\", "/"), "^([A-Za-z]):", "/$1");
         }
     }
