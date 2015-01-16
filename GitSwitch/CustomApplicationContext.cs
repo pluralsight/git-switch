@@ -40,7 +40,8 @@ namespace GitSwitch
             e.Cancel = false;
 
             notifyIcon.ContextMenuStrip.Items.Clear();
-            gitUserManager.GetUsers().ForEach(x => notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler(x.Username, OnGitUserClick)));
+            var currentUser = gitUserManager.GetCurrentUser();
+            gitUserManager.GetUsers().ForEach(x => notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler(x.Username, OnGitUserClick, (x == currentUser))));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Edit Users...", OnEditUsers));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
@@ -48,12 +49,12 @@ namespace GitSwitch
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", OnExit));
         }
 
-        private ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler, string tooltipText = null)
+        private ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler, bool isChecked = false)
         {
             var item = new ToolStripMenuItem(displayText);
             if (eventHandler != null) { item.Click += eventHandler; }
 
-            item.ToolTipText = tooltipText;
+            item.CheckState = isChecked ? CheckState.Checked : CheckState.Unchecked;
            
             return item;
         }

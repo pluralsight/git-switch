@@ -45,6 +45,7 @@ namespace UnitTests
         {
             Assert.AreEqual(0, manager.GetUsers().Count);
             Assert.Null(manager.GetUserByUsername("Any User"));
+            Assert.Null(manager.GetCurrentUser());
         }
 
         [Test]
@@ -97,9 +98,11 @@ namespace UnitTests
         {
             manager.AddUser(testUser);
             mockFileHasher.Setup(mock => mock.IsHashCorrectForFile(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
-            
+            Assert.Null(manager.GetCurrentUser());
+
             manager.ConfigureForUser(testUser.Username);
 
+            Assert.AreEqual(testUser, manager.GetCurrentUser());
             mockGitConfigEditor.Verify(mock => mock.SetGitUsernameAndEmail(testUser.Username, testUser.Email));
             mockSshConfigEditor.Verify(mock => mock.SetGitHubKeyFile(testUser.SshKeyPath));
             mockFileHasher.Verify(mock => mock.IsHashCorrectForFile(testUser.SshKeyHash, testUser.SshKeyPath));

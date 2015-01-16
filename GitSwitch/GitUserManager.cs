@@ -16,6 +16,7 @@ namespace GitSwitch
         private IGitConfigEditor gitConfigEditor;
         private ISshConfigEditor sshConfigEditor;
         private List<GitUser> users = new List<GitUser>();
+        private GitUser currentUser = null;
 
         public GitUserManager(IFileHandler serializer, IFileHasher fileHasher, IGitConfigEditor gitConfigEditor, ISshConfigEditor sshConfigEditor)
         {
@@ -85,12 +86,18 @@ namespace GitSwitch
             {
                 throw new InvalidUserException();
             }
+            currentUser = user;
             gitConfigEditor.SetGitUsernameAndEmail(user.Username, user.Email);
             sshConfigEditor.SetGitHubKeyFile(user.SshKeyPath);
             if (!fileHasher.IsHashCorrectForFile(user.SshKeyHash, user.SshKeyPath))
             {
                 throw new SshKeyHashException();
             }
+        }
+
+        public GitUser GetCurrentUser()
+        {
+            return currentUser;
         }
     }
 }
