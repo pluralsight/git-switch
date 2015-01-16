@@ -66,14 +66,16 @@ namespace GitSwitch
                 }
             }
 
+            if (output.Last() != "")
+            {
+                output.Add("");
+            }
+
             if (!didFindGitHub)
             {
-                if (output[output.Count - 1] != "")
-                {
-                    output.Add("");
-                }
                 output.Add(defaultSshConfig);
             }
+
             return string.Join("\n", output);
         }
 
