@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GitSwitch
 {
     public class GitConfigEditor : IGitConfigEditor
     {
-        private IFileHandler fileHandler;
+        private readonly IFileHandler fileHandler;
 
         public GitConfigEditor(IFileHandler fileHandler)
         {

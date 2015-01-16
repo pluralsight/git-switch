@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GitSwitch;
 using Moq;
 using NUnit.Framework;
@@ -122,9 +118,16 @@ namespace UnitTests
             manager.AddUser(testUser);
             mockFileHasher.Setup(mock => mock.IsHashCorrectForFile(It.IsAny<string>(), It.IsAny<string>())).Returns(false);
             
-            Assert.Throws<SshKeyHashException>(delegate { manager.ConfigureForUser(testUser.Username); });
+            Assert.Throws<SshKeyHashException>(() => manager.ConfigureForUser(testUser.Username));
 
             mockFileHasher.Verify(mock => mock.IsHashCorrectForFile(testUser.SshKeyHash, testUser.SshKeyPath));
+        }
+
+        [Test]
+        public void AddUserThrowsFileNotFoundExceptionIfSshFileDoesNotExist()
+        {
+            mockFileHasher.Setup(x => x.HashFile(It.IsAny<string>())).Throws<FileNotFoundException>();
+            Assert.Throws<FileNotFoundException>(() => manager.AddUser(new GitUser{Email = "email", Username = "name"}));
         }
     }
 }

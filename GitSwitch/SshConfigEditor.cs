@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GitSwitch
 {
     public class SshConfigEditor : ISshConfigEditor
     {
-        private IFileHandler fileHandler;
+        private readonly IFileHandler fileHandler;
+
+        public SshConfigEditor(IFileHandler fileHandler)
+        {
+            this.fileHandler = fileHandler;
+        }
 
         public string SshConfigFilePath
         {
@@ -18,11 +21,6 @@ namespace GitSwitch
             {
                 return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\.ssh\config";
             }
-        }
-
-        public SshConfigEditor(IFileHandler fileHandler)
-        {
-            this.fileHandler = fileHandler;
         }
 
         public void SetGitHubKeyFile(string sshKeyPath)

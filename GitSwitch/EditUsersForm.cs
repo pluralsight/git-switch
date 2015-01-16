@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -70,7 +71,14 @@ namespace GitSwitch
             currentGitUser.Username = UsernameTextBox.Text.Trim();
             currentGitUser.Email = EmailTextBox.Text.Trim();
             currentGitUser.SshKeyPath = SshKeyFileTextBox.Text;
-            gitUserManager.AddUser(currentGitUser);
+            try
+            {
+                gitUserManager.AddUser(currentGitUser);
+            }
+            catch (FileNotFoundException fnf)
+            {
+                MessageBox.Show(fnf.Message);
+            }
 
             RefreshUsersListBox();
             SetCurrentGitUser(null);

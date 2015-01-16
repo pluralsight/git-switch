@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GitSwitch
 {
     class CustomApplicationContext : ApplicationContext
     {
+        private readonly GitUserManager gitUserManager;
         private NotifyIcon notifyIcon;
-        private GitUserManager gitUserManager;
         private EditUsersForm editUsersForm;
         private HelpForm helpForm;
 
