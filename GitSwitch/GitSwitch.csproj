@@ -62,6 +62,7 @@
     <Compile Include="IFileHasher.cs" />
     <Compile Include="IGitConfigEditor.cs" />
     <Compile Include="ISshConfigEditor.cs" />
+    <Compile Include="NullGitUser.cs" />
     <Compile Include="Sha1FileHasher.cs" />
     <Compile Include="GitUser.cs" />
     <Compile Include="GitUserManager.cs" />

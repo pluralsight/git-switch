@@ -45,7 +45,7 @@ namespace UnitTests
         {
             Assert.AreEqual(0, manager.GetUsers().Count);
             Assert.Null(manager.GetUserByUsername("Any User"));
-            Assert.Null(manager.GetCurrentUser());
+            Assert.IsInstanceOf<NullGitUser>(manager.GetCurrentUser());
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace UnitTests
         {
             manager.AddUser(testUser);
             mockFileHasher.Setup(mock => mock.IsHashCorrectForFile(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
-            Assert.Null(manager.GetCurrentUser());
+            Assert.IsInstanceOf<NullGitUser>(manager.GetCurrentUser());
 
             manager.ConfigureForUser(testUser.Username);
 
@@ -109,9 +109,11 @@ namespace UnitTests
         }
 
         [Test]
-        public void ConfigureForUserThrowsAnExceptionIfItCannotFindTheUser()
+        public void ConfigureForUserUsesTheNullGitUserIfItCannotFindTheUser()
         {
-            Assert.Throws<InvalidUserException>(delegate { manager.ConfigureForUser("some-fake-user"); });
+            manager.ConfigureForUser("some-fake-user");
+
+            Assert.IsInstanceOf<NullGitUser>(manager.GetCurrentUser());
         }
 
         [Test]
