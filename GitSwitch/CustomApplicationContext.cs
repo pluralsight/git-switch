@@ -44,6 +44,7 @@ namespace GitSwitch
             gitUserManager.GetUsers().ForEach(x => notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler(x.Username, OnGitUserClick, (x == currentUser))));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Edit Users...", OnEditUsers));
+            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Logout", OnLogout, (currentUser is NullGitUser)));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Help", OnHelp));
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", OnExit));
@@ -102,6 +103,11 @@ namespace GitSwitch
         private void OnCloseEditUsersForm(object sender, EventArgs e)
         {
             editUsersForm = null;
+        }
+
+        private void OnLogout(object sender, EventArgs e)
+        {
+            gitUserManager.ConfigureForUser("");
         }
 
         private void OnHelp(object sender, EventArgs e)
