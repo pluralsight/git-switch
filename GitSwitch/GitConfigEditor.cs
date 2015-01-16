@@ -69,7 +69,7 @@ namespace GitSwitch
 
             if (!didFindUserSection)
             {
-                if (output[output.Count - 1] == "")
+                if (output.Last() == "")
                 {
                     output.RemoveAt(output.Count - 1);
                 }
@@ -78,6 +78,12 @@ namespace GitSwitch
                 output.Add("\temail = " + email);
                 output.Add("");
             }
+
+            if (output.Last() != "")
+            {
+                output.Add("");
+            }
+
             return string.Join("\n", output);
         }
     }

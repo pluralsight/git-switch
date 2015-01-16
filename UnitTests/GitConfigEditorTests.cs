@@ -82,7 +82,25 @@ namespace UnitTests
             mockFileHandler.Verify(mock => mock.WriteFile(editor.ConfigFilePath, expectedData));
         }
 
-        private IEnumerable<string> GetExampleGitConfig(string username = null, string email = null)
+        [Test]
+        public void ItAddsANewLineToTheEndOfTheFileIfNeeded()
+        {
+            string expectedData = string.Join("\n", GetExampleGitConfig(TestUsername, TestEmail));
+            mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Returns(GetExampleGitConfig("oldUser", "oldEmail", withEndingNewLine: false));
+            mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((path, data) =>
+                {
+                    Assert.AreEqual(editor.ConfigFilePath, path);
+                    Assert.AreEqual(expectedData, data);
+                });
+
+            editor.SetGitUsernameAndEmail(TestUsername, TestEmail);
+
+            mockFileHandler.Verify(mock => mock.ReadLines(editor.ConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(editor.ConfigFilePath, expectedData));
+        }
+
+        private IEnumerable<string> GetExampleGitConfig(string username = null, string email = null, bool withEndingNewLine = true)
         {
             var configLines = new List<string>();
             configLines.Add("[core]");
@@ -101,7 +119,10 @@ namespace UnitTests
             }
             configLines.Add("[push]");
             configLines.Add("\tdefault = simple");
-            configLines.Add("");
+            if (withEndingNewLine)
+            {
+                configLines.Add("");
+            }
             return configLines;
         }
     }
