@@ -22,6 +22,44 @@ GitSwitch expects your unix home (`~`) folder to be the same as your Windows Use
 If this is not the case, GitSwitch may change config files which are not in use by git/ssh.
 
 
+## Known Issues
+
+### [New drives not recognized](https://github.com/pluralsight/git-switch/issues/1)
+
+If you plug in a drive (e.g. USB) while your git bash or powershell console is open,
+the drive may not be recognized when you do an SSH operation (such as `git pull`).
+You'll get an error message something like this:
+
+```
+no such identity: /F/ssh_keys/id_rsa: No such file or directory
+Permission denied (publickey).
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+```
+
+Closing and reopening the console may resolve this, unless the `ssh-agent.exe` is running.
+If this happens, you must stop the `ssh-agent.exe` (from Task Manager) then restart the console.
+
+_(Note that this issue is related more to the operation of SSH and the bash shells rather than GitSwitch itself.
+GitSwitch should recognize the new drive and not error when you select your user.)_
+
+
+## Tips
+
+### Mapping your USB drive to a specific drive letter
+
+If you map a USB drive to a specific drive letter, you may avoid some issues of getting a different drive letter assigned.
+To do this:
+
+1. In File Explorer, right-click on 'This-PC' in the left nav
+2. Click 'Manage'
+3. Select 'Disk Management' under 'Storage'
+4. Click 'Change Drive Letter and Paths...'
+5. Assign a drive letter and click 'OK'
+
+
 ## Working on GitSwitch
 
 Please remember to bump the version number (using [semantic versioning rules](http://semver.org/))
