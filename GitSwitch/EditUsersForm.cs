@@ -55,6 +55,7 @@ namespace GitSwitch
             EmailTextBox.Text = temp.Email;
             SshKeyFileTextBox.Text = temp.SshKeyPath;
             SaveButton.Text = currentGitUser == null ? "Save New User" : "Update User";
+            ErrorsLabel.Text = "";
 
             if (currentGitUser == null)
             {
@@ -64,13 +65,61 @@ namespace GitSwitch
 
         private void SaveButton_Click(object sender, EventArgs e)
         {
+            var userForValidation = CreateGitUserFromForm();
+            var validationErrors = GetValidationErrors(userForValidation);
+            if (validationErrors.Count > 0)
+            {
+                ErrorsLabel.Text = string.Join("\r\n", validationErrors);
+            }
+            else
+            {
+                UpdateCurrentUser(userForValidation);
+                SaveCurrentGitUser();
+            }
+        }
+
+        private GitUser CreateGitUserFromForm()
+        {
+            var user = new GitUser();
+            user.Username = UsernameTextBox.Text.Trim();
+            user.Email = EmailTextBox.Text.Trim();
+            user.SshKeyPath = SshKeyFileTextBox.Text;
+            return user;
+        }
+
+        private List<string> GetValidationErrors(GitUser gitUser)
+        {
+            var validationErrors = new List<string>();
+            if (string.IsNullOrEmpty(gitUser.Username))
+            {
+                validationErrors.Add("You must provide a git user.name");
+            }
+            if (string.IsNullOrEmpty(gitUser.Email))
+            {
+                validationErrors.Add("You must provide a git user.email");
+            }
+            if (string.IsNullOrEmpty(gitUser.SshKeyPath))
+            {
+                validationErrors.Add("You must select an SSH key file");
+            }
+            return validationErrors;
+        }
+
+        private void UpdateCurrentUser(GitUser newGitUser)
+        {
             if (currentGitUser == null)
             {
-                currentGitUser = new GitUser();
+                currentGitUser = newGitUser;
             }
-            currentGitUser.Username = UsernameTextBox.Text.Trim();
-            currentGitUser.Email = EmailTextBox.Text.Trim();
-            currentGitUser.SshKeyPath = SshKeyFileTextBox.Text;
+            else
+            {
+                currentGitUser.Email = newGitUser.Email;
+                currentGitUser.Username = newGitUser.Username;
+                currentGitUser.SshKeyPath = newGitUser.SshKeyPath;
+            }
+        }
+
+        private void SaveCurrentGitUser() {
             try
             {
                 gitUserManager.AddUser(currentGitUser);

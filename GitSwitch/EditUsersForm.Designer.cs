@@ -40,6 +40,7 @@
             this.DeleteButton = new System.Windows.Forms.Button();
             this.AddNewUserButton = new System.Windows.Forms.Button();
             this.SaveButton = new System.Windows.Forms.Button();
+            this.ErrorsLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -151,11 +152,22 @@
             this.SaveButton.UseVisualStyleBackColor = true;
             this.SaveButton.Click += new System.EventHandler(this.SaveButton_Click);
             // 
+            // ErrorsLabel
+            // 
+            this.ErrorsLabel.AutoSize = true;
+            this.ErrorsLabel.ForeColor = System.Drawing.Color.Red;
+            this.ErrorsLabel.Location = new System.Drawing.Point(331, 396);
+            this.ErrorsLabel.Name = "ErrorsLabel";
+            this.ErrorsLabel.Size = new System.Drawing.Size(82, 25);
+            this.ErrorsLabel.TabIndex = 12;
+            this.ErrorsLabel.Text = "[Errors]";
+            // 
             // EditUsersForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(982, 624);
+            this.Controls.Add(this.ErrorsLabel);
             this.Controls.Add(this.SaveButton);
             this.Controls.Add(this.AddNewUserButton);
             this.Controls.Add(this.DeleteButton);
@@ -189,6 +201,7 @@
         private System.Windows.Forms.Button DeleteButton;
         private System.Windows.Forms.Button AddNewUserButton;
         private System.Windows.Forms.Button SaveButton;
+        private System.Windows.Forms.Label ErrorsLabel;
     }
 }
 
