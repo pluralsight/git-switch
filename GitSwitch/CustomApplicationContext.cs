@@ -67,6 +67,10 @@ namespace GitSwitch
             {
                 ShowErrorMessage("SSH key file could not be found at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
             }
+            catch (DirectoryNotFoundException)
+            {
+                ShowErrorMessage("SSH key file could not be found at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
+            }
             catch (SshKeyHashException)
             {
                 ShowErrorMessage("SSH key file has changed at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
