@@ -8,6 +8,7 @@ namespace GitSwitch
     class CustomApplicationContext : ApplicationContext
     {
         private readonly GitUserManager gitUserManager;
+        private readonly OptionsController optionsController;
         private NotifyIcon notifyIcon;
         private EditUsersForm editUsersForm;
         private HelpForm helpForm;
@@ -17,6 +18,7 @@ namespace GitSwitch
             InitializeTrayIcon();
             var fileHandler = new FileHandler();
             gitUserManager = new GitUserManager(fileHandler, new Sha1FileHasher(), new GitConfigEditor(fileHandler), new SshConfigEditor(fileHandler));
+            optionsController = new OptionsController(fileHandler);
         }
 
         private void InitializeTrayIcon()
@@ -42,8 +44,17 @@ namespace GitSwitch
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Edit Users...", OnEditUsers));
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Logout", OnLogout, (currentUser is NullGitUser)));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Help", OnHelp));
+            notifyIcon.ContextMenuStrip.Items.Add(createOptionsSubMenu());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", OnExit));
+        }
+
+        private ToolStripMenuItem createOptionsSubMenu()
+        {
+            var submenu = new ToolStripMenuItem("Help && Options");
+            submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Help", OnHelp));
+            submenu.DropDownItems.Add(new ToolStripSeparator());
+            submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Kill ssh-agent", OnKillSshAgent, optionsController.KillSshAgent));
+            return submenu;
         }
 
         private ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler, bool isChecked = false)
@@ -58,7 +69,16 @@ namespace GitSwitch
 
         private void OnGitUserClick(object sender, EventArgs e)
         {
-            string username = sender.ToString();
+            ConfigureForUser(sender.ToString());
+
+            if (optionsController.KillSshAgent)
+            {
+                new ProcessKiller().KillAllProcessesByName("ssh-agent");
+            }
+        }
+
+        private void ConfigureForUser(string username)
+        {
             try
             {
                 gitUserManager.ConfigureForUser(username);
@@ -138,6 +158,11 @@ namespace GitSwitch
         {
             notifyIcon.Visible = false;
             base.ExitThreadCore();
+        }
+
+        private void OnKillSshAgent(object sender, EventArgs e)
+        {
+            optionsController.ToggleKillSshAgent();
         }
     }
 }
