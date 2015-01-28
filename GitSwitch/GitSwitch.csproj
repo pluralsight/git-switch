@@ -52,6 +52,7 @@
       <DependentUpon>EditUsersForm.cs</DependentUpon>
     </Compile>
     <Compile Include="GitConfigEditor.cs" />
+    <Compile Include="GitSwitchOptions.cs" />
     <Compile Include="HelpForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -61,9 +62,11 @@
     <Compile Include="InvalidUserException.cs" />
     <Compile Include="IFileHasher.cs" />
     <Compile Include="IGitConfigEditor.cs" />
+    <Compile Include="IOptionsController.cs" />
     <Compile Include="IProcessKiller.cs" />
     <Compile Include="ISshConfigEditor.cs" />
     <Compile Include="NullGitUser.cs" />
+    <Compile Include="OptionsController.cs" />
     <Compile Include="ProcessKiller.cs" />
     <Compile Include="Sha1FileHasher.cs" />
     <Compile Include="GitUser.cs" />
