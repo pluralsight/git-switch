@@ -24,11 +24,10 @@ If this is not the case, GitSwitch may change config files which are not in use 
 
 ## Known Issues
 
-### [New drives not recognized](https://github.com/pluralsight/git-switch/issues/1)
+### New drives not recognized by git bash shell
 
-If you plug in a drive (e.g. USB) while your git bash or powershell console is open,
-the drive may not be recognized when you do an SSH operation (such as `git pull`).
-You'll get an error message something like this:
+If you plug in a drive (e.g. USB) while your git bash shell is open, the drive may not be recognized.
+When you do an SSH operation (such as `git pull`) you'll get an error message something like this:
 
 ```
 no such identity: /F/ssh_keys/id_rsa: No such file or directory
@@ -39,11 +38,18 @@ Please make sure you have the correct access rights
 and the repository exists.
 ```
 
-Closing and reopening the console may resolve this, unless the `ssh-agent.exe` is running.
-If this happens, you must stop the `ssh-agent.exe` (from Task Manager) then restart the console.
+You have to close **all** git bash windows then re-open for the new drive to be recognized.
+(Per [this](http://stackoverflow.com/a/12082487/843431) and [this](http://stackoverflow.com/a/9833065/843431).)
 
-_(Note that this issue is related more to the operation of SSH and the bash shells rather than GitSwitch itself.
-GitSwitch should recognize the new drive and not error when you select your user.)_
+### [New drives not recognized by ssh-agent](https://github.com/pluralsight/git-switch/issues/1)
+
+While the `ssh-agent` is running it may not recognize drive changes,
+and won't be able to find your SSH key (giving the same error as above).
+You must end the `ssh-agent` process to get past this error.
+
+GitSwitch has an option to "Kill ssh-agent on user change" which, when checked,
+will kill all `ssh-agent` processes for you whenever you change users.
+This option is not checked by default (but will be remembered if you check it).
 
 
 ## Tips
