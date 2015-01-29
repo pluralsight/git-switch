@@ -44,11 +44,11 @@ namespace GitSwitch
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Edit Users...", OnEditUsers));
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Logout", OnLogout, (currentUser is NullGitUser)));
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-            notifyIcon.ContextMenuStrip.Items.Add(createOptionsSubMenu());
+            notifyIcon.ContextMenuStrip.Items.Add(CreateOptionsSubMenu());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", OnExit));
         }
 
-        private ToolStripMenuItem createOptionsSubMenu()
+        private ToolStripMenuItem CreateOptionsSubMenu()
         {
             var submenu = new ToolStripMenuItem("Help && Options");
             submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Help", OnHelp));
