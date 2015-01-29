@@ -53,7 +53,7 @@ namespace GitSwitch
             var submenu = new ToolStripMenuItem("Help && Options");
             submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Help", OnHelp));
             submenu.DropDownItems.Add(new ToolStripSeparator());
-            submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Kill ssh-agent", OnKillSshAgent, optionsController.KillSshAgent));
+            submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Kill ssh-agent on user change", OnKillSshAgent, optionsController.KillSshAgent));
             return submenu;
         }
 
