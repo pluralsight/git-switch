@@ -81,3 +81,4 @@ in the `AssemblyInfo.cs` file for issue tracking purposes.
 * **Q:** What's with that icon?
 * **A:** Yeah, I know; I'm a programmer.
     It's supposed to be the [git (bash) logo](http://git-scm.com/) combined with a user icon.
+
