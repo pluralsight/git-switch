@@ -4,9 +4,11 @@ namespace GitSwitch
 {
     public class ProcessKiller : IProcessKiller
     {
-        public void KillAllProcessesByName(string processName)
+        private const string SshAgentProcessName = "ssh-agent";
+
+        public void KillSshAgent()
         {
-            foreach (var process in Process.GetProcessesByName(processName))
+            foreach (var process in Process.GetProcessesByName(SshAgentProcessName))
             {
                 process.Kill();
             }

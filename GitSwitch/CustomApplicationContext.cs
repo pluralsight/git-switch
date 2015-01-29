@@ -73,7 +73,7 @@ namespace GitSwitch
 
             if (optionsController.KillSshAgent)
             {
-                new ProcessKiller().KillAllProcessesByName("ssh-agent");
+                new ProcessKiller().KillSshAgent();
             }
         }
 

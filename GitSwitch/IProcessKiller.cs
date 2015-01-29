@@ -2,6 +2,6 @@
 {
     public interface IProcessKiller
     {
-        void KillAllProcessesByName(string processName);
+        void KillSshAgent();
     }
 }
