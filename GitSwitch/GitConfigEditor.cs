@@ -67,7 +67,7 @@ namespace GitSwitch
 
             if (!didFindUserSection)
             {
-                if (output.Last() == "")
+                if (output.Count > 0 && output.Last() == "")
                 {
                     output.RemoveAt(output.Count - 1);
                 }

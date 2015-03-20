@@ -42,6 +42,24 @@ namespace UnitTests
         }
 
         [Test]
+        public void ItWritesNewConfigDataIfTheExistingConfigWasEmptyFound()
+        {
+            string expectedData = string.Format("[user]\n\tname = {0}\n\temail = {1}\n", TestUsername, TestEmail);
+            mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Returns(new List<string>());
+            mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((path, data) =>
+                {
+                    Assert.AreEqual(editor.ConfigFilePath, path);
+                    Assert.AreEqual(expectedData, data);
+                });
+
+            editor.SetGitUsernameAndEmail(TestUsername, TestEmail);
+
+            mockFileHandler.Verify(mock => mock.ReadLines(editor.ConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(editor.ConfigFilePath, expectedData));
+        }
+
+        [Test]
         public void ItAddsTheUserSectionIfNotFound()
         {
             string expectedData = string.Join("\n", GetExampleGitConfig()) +
