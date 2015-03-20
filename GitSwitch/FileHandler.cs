@@ -40,6 +40,7 @@ namespace GitSwitch
 
         public void WriteFile(string filePath, string data)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             File.WriteAllText(filePath, data);
         }
     }

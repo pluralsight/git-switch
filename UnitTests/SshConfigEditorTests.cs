@@ -43,6 +43,25 @@ namespace UnitTests
         }
 
         [Test]
+        public void ItWritesANewFileIfTheConfigDirectoryWasNotFound()
+        {
+            string expectedData = "Host github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
+
+            mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Throws(new DirectoryNotFoundException());
+            mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((path, data) =>
+                {
+                    Assert.AreEqual(editor.SshConfigFilePath, path);
+                    Assert.AreEqual(expectedData, data);
+                });
+
+            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+
+            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+        }
+
+        [Test]
         public void ItAddsTheGitHubEntryIfItWasNotFound()
         {
             List<string> priorConfigLines = GetExampleConfigLines();

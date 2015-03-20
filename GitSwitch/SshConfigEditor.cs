@@ -27,12 +27,16 @@ namespace GitSwitch
         {
             string unixSshKeyPath = WindowsToUnixPath(sshKeyPath);
             string defaultSshConfig = "Host github.com\n\tIdentityFile " + unixSshKeyPath + "\n";
-            
+
             try
             {
                 IEnumerable<string> configFileLines = fileHandler.ReadLines(SshConfigFilePath);
                 var newSsshConfig = ProcessSshFile(configFileLines, unixSshKeyPath, defaultSshConfig);
                 fileHandler.WriteFile(SshConfigFilePath, newSsshConfig);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                fileHandler.WriteFile(SshConfigFilePath, defaultSshConfig);
             }
             catch (FileNotFoundException)
             {
