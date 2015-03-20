@@ -68,7 +68,7 @@ namespace GitSwitch
                 }
             }
 
-            if (output.Last() != "")
+            if (output.Count > 0 && output.Last() != "")
             {
                 output.Add("");
             }

@@ -142,6 +142,26 @@ namespace UnitTests
             mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
         }
 
+        [Test]
+        public void ItHandlesTheCaseOfAnEmptyConfigFile()
+        {
+            List<string> priorConfigLines = new List<string>();
+            string expectedData = "Host github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
+
+            mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Returns(priorConfigLines);
+            mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
+                .Callback<string, string>((path, data) =>
+                {
+                    Assert.AreEqual(editor.SshConfigFilePath, path);
+                    Assert.AreEqual(expectedData, data);
+                });
+
+            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+
+            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+        }
+
         private List<string> GetExampleConfigLines(string gitHubKey = null, bool endWithNewLine = true)
         {
             var lines = new List<string>();
