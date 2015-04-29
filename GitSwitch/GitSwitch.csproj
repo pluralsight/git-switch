@@ -53,6 +53,7 @@
     </Compile>
     <Compile Include="GitConfigEditor.cs" />
     <Compile Include="GitSwitchOptions.cs" />
+    <Compile Include="GravatarUrlBuilder.cs" />
     <Compile Include="HelpForm.cs">
       <SubType>Form</SubType>
     </Compile>
