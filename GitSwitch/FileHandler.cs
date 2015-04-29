@@ -43,5 +43,10 @@ namespace GitSwitch
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             File.WriteAllText(filePath, data);
         }
+
+        public bool DoesFileExist(string filePath)
+        {
+            return File.Exists(filePath);
+        }
     }
 }

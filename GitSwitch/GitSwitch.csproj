@@ -60,6 +60,9 @@
     <Compile Include="HelpForm.Designer.cs">
       <DependentUpon>HelpForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IconDownloader.cs" />
+    <Compile Include="IconRepository.cs" />
+    <Compile Include="IIconDownloader.cs" />
     <Compile Include="InvalidUserException.cs" />
     <Compile Include="IFileHasher.cs" />
     <Compile Include="IGitConfigEditor.cs" />

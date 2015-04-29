@@ -8,5 +8,6 @@ namespace GitSwitch
         void SerializeToFile<T>(string filePath, T TInput);
         IEnumerable<string> ReadLines(string filePath);
         void WriteFile(string filePath, string data);
+        bool DoesFileExist(string filePath);
     }
 }
