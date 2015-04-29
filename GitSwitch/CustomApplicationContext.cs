@@ -12,6 +12,7 @@ namespace GitSwitch
         private NotifyIcon notifyIcon;
         private EditUsersForm editUsersForm;
         private HelpForm helpForm;
+        private IconRepository iconRepository;
 
         public CustomApplicationContext()
         {
@@ -19,6 +20,7 @@ namespace GitSwitch
             var fileHandler = new FileHandler();
             gitUserManager = new GitUserManager(fileHandler, new Sha1FileHasher(), new GitConfigEditor(fileHandler), new SshConfigEditor(fileHandler));
             optionsController = new OptionsController(fileHandler);
+            iconRepository = new IconRepository(new IconDownloader(), fileHandler);
         }
 
         private void InitializeTrayIcon()
@@ -82,6 +84,7 @@ namespace GitSwitch
             try
             {
                 gitUserManager.ConfigureForUser(username);
+                notifyIcon.Icon = new Icon(iconRepository.GetIconFilePathForUser(gitUserManager.GetCurrentUser()));
             }
             catch (FileNotFoundException)
             {

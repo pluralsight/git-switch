@@ -11,7 +11,10 @@ namespace GitSwitch
             var bytes = new WebClient().DownloadData(url);
             var bitmap = new Bitmap(new MemoryStream(bytes));
             var icon = Icon.FromHandle(bitmap.GetHicon());
-            icon.Save(new FileStream(filePath, FileMode.Create));
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                icon.Save(fileStream);
+            }
         }
     }
 }
