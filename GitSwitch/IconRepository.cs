@@ -1,4 +1,6 @@
-﻿namespace GitSwitch
+﻿using System.Drawing;
+
+namespace GitSwitch
 {
     public class IconRepository
     {
@@ -14,12 +16,17 @@
         public string GetIconFilePathForUser(GitUser gitUser)
         {
             var gravitarUrlBuilder = new GravatarUrlBuilder();
-            var fileName = string.Format("./{0}.ico", gravitarUrlBuilder.HashEmail(gravitarUrlBuilder.NormalizeEmail(gitUser.Email)));
+            var fileName = string.Format("./{0}.jpg", gravitarUrlBuilder.HashEmail(gravitarUrlBuilder.NormalizeEmail(gitUser.Email)));
 
             if (!fileHandler.DoesFileExist(fileName))
                 iconDownloader.DownloadIcon(gravitarUrlBuilder.GetUrlForEmail(gitUser.Email), fileName);
 
             return fileName;
+        }
+
+        public Icon GetIconForUser(GitUser gitUser)
+        {
+            return Icon.FromHandle(new Bitmap(GetIconFilePathForUser(gitUser)).GetHicon());
         }
     }
 }

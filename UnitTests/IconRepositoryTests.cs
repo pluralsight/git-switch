@@ -15,7 +15,7 @@ namespace UnitTests
         {
             Email = "test@example.com"
         };
-        private string expectedFilePath = "./55502f40dc8b7c769880b10874abc9d0.ico";
+        private string expectedFilePath = "./55502f40dc8b7c769880b10874abc9d0.jpg";
         
         [SetUp]
         public void Setup()

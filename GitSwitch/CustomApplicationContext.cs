@@ -84,7 +84,7 @@ namespace GitSwitch
             try
             {
                 gitUserManager.ConfigureForUser(username);
-                notifyIcon.Icon = new Icon(iconRepository.GetIconFilePathForUser(gitUserManager.GetCurrentUser()));
+                notifyIcon.Icon = iconRepository.GetIconForUser(gitUserManager.GetCurrentUser());
             }
             catch (FileNotFoundException)
             {
