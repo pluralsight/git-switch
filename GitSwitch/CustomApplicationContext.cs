@@ -13,6 +13,7 @@ namespace GitSwitch
         private EditUsersForm editUsersForm;
         private HelpForm helpForm;
         private IconRepository iconRepository;
+        private Icon defaultIcon;
 
         public CustomApplicationContext()
         {
@@ -25,10 +26,11 @@ namespace GitSwitch
 
         private void InitializeTrayIcon()
         {
+            defaultIcon = new Icon("gitswitch64x64.ico");
             notifyIcon = new NotifyIcon()
             {
                 ContextMenuStrip = new ContextMenuStrip(),
-                Icon = new Icon("gitswitch64x64.ico"),
+                Icon = defaultIcon,
                 Text = "GitSwitch",
                 Visible = true
             };
@@ -131,6 +133,7 @@ namespace GitSwitch
         private void OnLogout(object sender, EventArgs e)
         {
             gitUserManager.ConfigureForUser("");
+            notifyIcon.Icon = defaultIcon;
         }
 
         private void OnHelp(object sender, EventArgs e)
