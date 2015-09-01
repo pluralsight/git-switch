@@ -12,7 +12,7 @@ namespace GitSwitch
         private NotifyIcon notifyIcon;
         private EditUsersForm editUsersForm;
         private HelpForm helpForm;
-        private IconRepository iconRepository;
+        private readonly IconRepository iconRepository;
         private Icon defaultIcon;
 
         public CustomApplicationContext()
@@ -26,7 +26,9 @@ namespace GitSwitch
 
         private void InitializeTrayIcon()
         {
-            defaultIcon = new Icon("gitswitch64x64.ico");
+            var pathToIcon = Path.Combine(Directory.GetCurrentDirectory(), "gitswitch64x64.ico");
+            defaultIcon = new Icon(pathToIcon);
+
             notifyIcon = new NotifyIcon()
             {
                 ContextMenuStrip = new ContextMenuStrip(),
