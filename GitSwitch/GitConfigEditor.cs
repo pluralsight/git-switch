@@ -6,41 +6,46 @@ using System.Text.RegularExpressions;
 
 namespace GitSwitch
 {
+    public interface IGitConfigEditor
+    {
+        void SetGitNameAndEmail(string name, string email);
+    }
+
     public class GitConfigEditor : IGitConfigEditor
     {
-        private readonly IFileHandler fileHandler;
+        readonly IFileHandler fileHandler;
 
         public GitConfigEditor(IFileHandler fileHandler)
         {
             this.fileHandler = fileHandler;
         }
 
-        public string ConfigFilePath
+        internal string ConfigFilePath
         {
             get
             {
-                return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\.gitconfig";
+                return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + AppConstants.GitConfigFile;
             }
         }
 
-        public void SetGitUsernameAndEmail(string username, string email)
+        public void SetGitNameAndEmail(string name, string email)
         {
             string newConfig;
 
             try
             {
                 IEnumerable<string> configLines = fileHandler.ReadLines(ConfigFilePath);
-                newConfig = ProcessConfigFile(configLines, username, email);
+                newConfig = ProcessConfigFile(configLines, name, email);
             }
             catch (FileNotFoundException)
             {
-                newConfig = string.Format("[user]\n\tname = {0}\n\temail = {1}\n", username, email);
+                newConfig = string.Format("[user]\n\tname = {0}\n\temail = {1}\n", name, email);
             }
 
             fileHandler.WriteFile(ConfigFilePath, newConfig);
         }
 
-        private string ProcessConfigFile(IEnumerable<string> configLines, string username, string email)
+        string ProcessConfigFile(IEnumerable<string> configLines, string name, string email)
         {
             var output = new List<string>();
             bool didFindUserSection = false;
@@ -55,32 +60,28 @@ namespace GitSwitch
                     if (inUserSection)
                     {
                         didFindUserSection = true;
-                        output.Add("\tname = " + username);
+                        output.Add("\tname = " + name);
                         output.Add("\temail = " + email);
                     }
                 }
+
                 if (inUserSection && Regex.IsMatch(line, @"^\s*(name|email)\s+=\s+"))
-                {
                     output.RemoveAt(output.Count - 1);
-                }
             }
 
             if (!didFindUserSection)
             {
                 if (output.Count > 0 && output.Last() == "")
-                {
                     output.RemoveAt(output.Count - 1);
-                }
+
                 output.Add("[user]");
-                output.Add("\tname = " + username);
+                output.Add("\tname = " + name);
                 output.Add("\temail = " + email);
                 output.Add("");
             }
 
             if (output.Last() != "")
-            {
                 output.Add("");
-            }
 
             return string.Join("\n", output);
         }

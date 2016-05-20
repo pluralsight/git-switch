@@ -6,53 +6,48 @@ namespace UnitTests
     [TestFixture]
     public class GravatarUrlBuilderTests
     {
-        private GravatarUrlBuilder ClassUnderTest;
+        GravatarUrlBuilder classUnderTest;
 
         [SetUp]
         public void Setup()
         {
-            ClassUnderTest = new GravatarUrlBuilder();
+            classUnderTest = new GravatarUrlBuilder();
         }
 
         [Test]
-        public void NormalizedEmailsContainNoSpaces()
+        public void NormalizeEmail_TrimsSpaces()
         {
             var input = " test@example.com ";
-
-            var output = ClassUnderTest.NormalizeEmail(input);
+            var output = classUnderTest.NormalizeEmail(input);
 
             Assert.That(output, Is.EqualTo("test@example.com"));
         }
 
         [Test]
-        public void NormalizedEmailsAreLowerCase()
+        public void NormalizeEmail_ReturnsToLowerCase()
         {
             var input = "Test@Example.com";
-
-            var output = ClassUnderTest.NormalizeEmail(input);
+            var output = classUnderTest.NormalizeEmail(input);
 
             Assert.That(output, Is.EqualTo("test@example.com"));
         }
 
-
         [Test]
-        public void EmailsAreMd5Hashed()
+        public void HashEmail_ReturnsMd5Hash()
         {
             var input = "test@example.com";
-
-            var output = ClassUnderTest.HashEmail(input);
+            var output = classUnderTest.HashEmail(input);
 
             Assert.That(output, Is.EqualTo("55502f40dc8b7c769880b10874abc9d0"));
         }
 
         [Test]
-        public void UrlsAreProperlyFormatted()
+        public void GetUrlForEmail()
         {
             var input = " Test@Example.com ";
+            var output = classUnderTest.GetUrlForEmail(input);
 
-            var output = ClassUnderTest.GetUrlForEmail(input);
-
-            Assert.That(output, Is.EqualTo("http://gravatar.com/avatar/55502f40dc8b7c769880b10874abc9d0?s=64&r=g"));
+            Assert.That(output, Is.EqualTo(string.Format(AppConstants.GravatarUrlFormat, "55502f40dc8b7c769880b10874abc9d0")));
         }
     }
 }

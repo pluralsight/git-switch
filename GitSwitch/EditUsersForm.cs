@@ -1,128 +1,107 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GitSwitch
 {
     public partial class EditUsersForm : Form
     {
-        private GitUserManager gitUserManager;
-        private GitUser currentGitUser;
+        readonly IGitUserManager gitUserManager;
 
-        public EditUsersForm(GitUserManager gitUserManager)
+        GitUser currentUser;
+
+        public EditUsersForm(IGitUserManager gitUserManager)
         {
             this.gitUserManager = gitUserManager;
+
             InitializeComponent();
-            SetCurrentGitUser(null);
+            InitializeGitUserEditForm(new NullGitUser());
             RefreshUsersListBox();
         }
 
-        private void RefreshUsersListBox()
+        void RefreshUsersListBox()
         {
             UsersListBox.ClearSelected();
             UsersListBox.Items.Clear();
-            gitUserManager.GetUsers().ForEach(x => UsersListBox.Items.Add(x.Username));
+
+            gitUserManager.Users.ForEach(x => UsersListBox.Items.Add(x.Name));
         }
 
-        private void BrowseButton_Click(object sender, EventArgs e)
+        void BrowseButton_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
             DialogResult result = dialog.ShowDialog();
+
             if (result == DialogResult.OK)
-            {
                 SshKeyFileTextBox.Text = dialog.FileName;
-            }
         }
 
-        private void AddNewUserButton_Click(object sender, EventArgs e)
+        void AddNewUserButton_Click(object sender, EventArgs e)
         {
-            SetCurrentGitUser(null);
+            InitializeGitUserEditForm(new NullGitUser());
         }
 
-        private void SetCurrentGitUser(GitUser gitUser)
+        void InitializeGitUserEditForm(GitUser user)
         {
-            currentGitUser = gitUser;
+            currentUser = user;
 
-            GitUser temp = currentGitUser ?? new GitUser();
-            UsernameTextBox.Text = temp.Username;
-            EmailTextBox.Text = temp.Email;
-            SshKeyFileTextBox.Text = temp.SshKeyPath;
-            SaveButton.Text = currentGitUser == null ? "Save New User" : "Update User";
+            NameTextBox.Text = currentUser.Name;
+            EmailTextBox.Text = currentUser.Email;
+            SshKeyFileTextBox.Text = currentUser.SshKeyPath;
+            SaveButton.Text = currentUser is NullGitUser ? "Save New User" : "Update User";
             ErrorsLabel.Text = "";
 
-            if (currentGitUser == null)
-            {
+            if (currentUser is NullGitUser)
                 UsersListBox.ClearSelected();
-            }
         }
 
-        private void SaveButton_Click(object sender, EventArgs e)
+        void SaveButton_Click(object sender, EventArgs e)
         {
-            var userForValidation = CreateGitUserFromForm();
-            var validationErrors = GetValidationErrors(userForValidation);
-            if (validationErrors.Count > 0)
-            {
+            UpdateCurrentUserFromFrom();
+
+            var validationErrors = GetValidationErrors(currentUser);
+            if (validationErrors.Any())
                 ErrorsLabel.Text = string.Join("\r\n", validationErrors);
-            }
             else
-            {
-                UpdateCurrentUser(userForValidation);
-                SaveCurrentGitUser();
-            }
+                SaveUser(currentUser);
         }
 
-        private GitUser CreateGitUserFromForm()
+        void UpdateCurrentUserFromFrom()
         {
-            var user = new GitUser();
-            user.Username = UsernameTextBox.Text.Trim();
-            user.Email = EmailTextBox.Text.Trim();
-            user.SshKeyPath = SshKeyFileTextBox.Text;
-            return user;
+            var name = NameTextBox.Text.Trim();
+            var email = EmailTextBox.Text.Trim();
+            var sshKeyPath = SshKeyFileTextBox.Text;
+
+            if(currentUser is NullGitUser)
+                currentUser = new GitUser(name, email, sshKeyPath);
+
+            currentUser.Name = name;
+            currentUser.Email = email;
+            currentUser.SshKeyPath = sshKeyPath;
         }
 
-        private List<string> GetValidationErrors(GitUser gitUser)
+        List<string> GetValidationErrors(GitUser user)
         {
             var validationErrors = new List<string>();
-            if (string.IsNullOrEmpty(gitUser.Username))
-            {
-                validationErrors.Add("You must provide a git user.name");
-            }
-            if (string.IsNullOrEmpty(gitUser.Email))
-            {
-                validationErrors.Add("You must provide a git user.email");
-            }
-            if (string.IsNullOrEmpty(gitUser.SshKeyPath))
-            {
+            if (string.IsNullOrEmpty(user.Name))
+                validationErrors.Add("You must provide a name");
+
+            if (string.IsNullOrEmpty(user.Email))
+                validationErrors.Add("You must provide an email");
+
+            if (string.IsNullOrEmpty(user.SshKeyPath))
                 validationErrors.Add("You must select an SSH key file");
-            }
+
             return validationErrors;
         }
 
-        private void UpdateCurrentUser(GitUser newGitUser)
+        void SaveUser(GitUser user)
         {
-            if (currentGitUser == null)
-            {
-                currentGitUser = newGitUser;
-            }
-            else
-            {
-                currentGitUser.Email = newGitUser.Email;
-                currentGitUser.Username = newGitUser.Username;
-                currentGitUser.SshKeyPath = newGitUser.SshKeyPath;
-            }
-        }
-
-        private void SaveCurrentGitUser() {
             try
             {
-                gitUserManager.AddUser(currentGitUser);
+                gitUserManager.AddUser(user);
             }
             catch (FileNotFoundException fnf)
             {
@@ -130,24 +109,23 @@ namespace GitSwitch
             }
 
             RefreshUsersListBox();
-            SetCurrentGitUser(null);
+            InitializeGitUserEditForm(new NullGitUser());
         }
 
-        private void UsersListBox_SelectedIndexChanged(object sender, EventArgs e)
+        void UsersListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            SetCurrentGitUser(GetSelectedGitUser());
+            InitializeGitUserEditForm(GetSelectedGitUser());
         }
 
-        private GitUser GetSelectedGitUser()
+        GitUser GetSelectedGitUser()
         {
             if (UsersListBox.SelectedItem == null)
-            {
-                return null;
-            }
-            return gitUserManager.GetUserByUsername(UsersListBox.SelectedItem.ToString());
+                return new NullGitUser();
+
+            return gitUserManager.GetUserByName(UsersListBox.SelectedItem.ToString());
         }
 
-        private void DeleteButton_Click(object sender, EventArgs e)
+        void DeleteButton_Click(object sender, EventArgs e)
         {
             GitUser userToDelete = GetSelectedGitUser();
             if (userToDelete != null)

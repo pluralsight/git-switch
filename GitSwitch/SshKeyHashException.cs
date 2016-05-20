@@ -3,6 +3,5 @@
 namespace GitSwitch
 {
     public class SshKeyHashException : ApplicationException
-    {
-    }
+    { }
 }

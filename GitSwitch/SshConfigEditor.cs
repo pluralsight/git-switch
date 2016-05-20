@@ -6,20 +6,25 @@ using System.Text.RegularExpressions;
 
 namespace GitSwitch
 {
+    public interface ISshConfigEditor
+    {
+        void SetGitHubKeyFile(string sshKeyPath);
+    }
+
     public class SshConfigEditor : ISshConfigEditor
     {
-        private readonly IFileHandler fileHandler;
+        readonly IFileHandler fileHandler;
 
         public SshConfigEditor(IFileHandler fileHandler)
         {
             this.fileHandler = fileHandler;
         }
 
-        public string SshConfigFilePath
+        internal string SshConfigFilePath
         {
             get
             {
-                return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\.ssh\config";
+                return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + AppConstants.SshConfigFile;
             }
         }
 
@@ -44,7 +49,7 @@ namespace GitSwitch
             }
         }
 
-        private static string ProcessSshFile(IEnumerable<string> configFileLines, string unixSshKeyPath, string defaultSshConfig)
+        static string ProcessSshFile(IEnumerable<string> configFileLines, string unixSshKeyPath, string defaultSshConfig)
         {
             List<string> output = new List<string>();
             bool didFindGitHub = false;
@@ -62,31 +67,25 @@ namespace GitSwitch
                         output.Add("\tIdentityFile " + unixSshKeyPath);
                     }
                 }
+
                 if (inGitHubSection && Regex.IsMatch(line, @"^\s*IdentityFile\s+"))
-                {
                     output.RemoveAt(output.Count - 1);
-                }
             }
 
             if (output.Count > 0 && output.Last() != "")
-            {
                 output.Add("");
-            }
 
             if (!didFindGitHub)
-            {
                 output.Add(defaultSshConfig);
-            }
 
             return string.Join("\n", output);
         }
 
-        private string WindowsToUnixPath(string path)
+        string WindowsToUnixPath(string path)
         {
             if (string.IsNullOrEmpty(path))
-            {
                 return string.Empty;
-            }
+
             return Regex.Replace(path.Replace("\\", "/"), "^([A-Za-z]):", "/$1");
         }
     }

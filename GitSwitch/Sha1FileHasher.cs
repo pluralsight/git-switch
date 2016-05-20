@@ -4,6 +4,12 @@ using System.Security.Cryptography;
 
 namespace GitSwitch
 {
+    public interface IFileHasher
+    {
+        string HashFile(string filePath);
+        bool IsHashCorrectForFile(string hash, string filePath);
+    }
+
     public class Sha1FileHasher : IFileHasher
     {
         public string HashFile(string filePath)

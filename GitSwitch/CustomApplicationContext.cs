@@ -1,164 +1,192 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace GitSwitch
 {
-    class CustomApplicationContext : ApplicationContext
+    public class CustomApplicationContext : ApplicationContext
     {
-        private readonly GitUserManager gitUserManager;
-        private readonly OptionsController optionsController;
-        private NotifyIcon notifyIcon;
-        private EditUsersForm editUsersForm;
-        private HelpForm helpForm;
-        private readonly IconRepository iconRepository;
-        private Icon defaultIcon;
+        readonly IGitUserManager gitUserManager;
+        readonly IOptionsManager optionsManager;
+        readonly IIconRepository iconRepository;
+        readonly IProcessKiller processKiller;
 
-        public CustomApplicationContext()
+        NotifyIcon notifyIcon;
+        EditUsersForm editUsersForm;
+        SelectManyUsersForm selectManyUsersForm;
+        HelpForm helpForm;
+        Icon defaultIcon;
+
+        public CustomApplicationContext(IGitUserManager gitUserManager, IOptionsManager optionsManager, IIconRepository iconRepository, IProcessKiller processKiller)
         {
+            this.gitUserManager = gitUserManager;
+            this.optionsManager = optionsManager;
+            this.iconRepository = iconRepository;
+            this.processKiller = processKiller;
+
             InitializeTrayIcon();
-            var fileHandler = new FileHandler();
-            gitUserManager = new GitUserManager(fileHandler, new Sha1FileHasher(), new GitConfigEditor(fileHandler), new SshConfigEditor(fileHandler));
-            optionsController = new OptionsController(fileHandler);
-            iconRepository = new IconRepository(new IconDownloader(), fileHandler);
         }
 
-        private void InitializeTrayIcon()
+        void InitializeTrayIcon()
         {
-            var pathToIcon = Path.Combine(Directory.GetCurrentDirectory(), "gitswitch64x64.ico");
+            var pathToIcon = Path.Combine(Directory.GetCurrentDirectory(), AppConstants.ApplicationIcon);
             defaultIcon = new Icon(pathToIcon);
 
-            notifyIcon = new NotifyIcon()
+            notifyIcon = new NotifyIcon
             {
                 ContextMenuStrip = new ContextMenuStrip(),
                 Icon = defaultIcon,
                 Text = "GitSwitch",
                 Visible = true
             };
+
             notifyIcon.ContextMenuStrip.Opening += OnContextMenuStripOpening;
         }
 
-        private void OnContextMenuStripOpening(object sender, System.ComponentModel.CancelEventArgs e)
+        void OnContextMenuStripOpening(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = false;
 
             notifyIcon.ContextMenuStrip.Items.Clear();
-            var currentUser = gitUserManager.GetCurrentUser();
-            gitUserManager.GetUsers().ForEach(x => notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler(x.Username, OnGitUserClick, (x == currentUser))));
+
+            var activeUsers = gitUserManager.ActiveUsers;
+            gitUserManager.Users.ForEach(x => notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler(x.Name, OnGitUserClick, activeUsers.Contains(x))));
+
+            notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Select a pair or mob...", OnSelectMany));
+            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Logout", OnLogout, !activeUsers.Any()));
+
             notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Edit Users...", OnEditUsers));
-            notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("Logout", OnLogout, (currentUser is NullGitUser)));
-            notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
             notifyIcon.ContextMenuStrip.Items.Add(CreateOptionsSubMenu());
             notifyIcon.ContextMenuStrip.Items.Add(ToolStripMenuItemWithHandler("&Exit", OnExit));
         }
 
-        private ToolStripMenuItem CreateOptionsSubMenu()
+        ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler, bool isChecked = false)
+        {
+            var item = new ToolStripMenuItem(displayText);
+            if (eventHandler != null)
+                item.Click += eventHandler;
+
+            item.CheckState = isChecked ? CheckState.Checked : CheckState.Unchecked;
+
+            return item;
+        }
+
+        ToolStripMenuItem CreateOptionsSubMenu()
         {
             var submenu = new ToolStripMenuItem("Help && Options");
             submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Help", OnHelp));
             submenu.DropDownItems.Add(new ToolStripSeparator());
-            submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Kill ssh-agent on user change", OnKillSshAgent, optionsController.KillSshAgent));
+            submenu.DropDownItems.Add(ToolStripMenuItemWithHandler("Kill ssh-agent on user change", OnKillSshAgent, optionsManager.KillSshAgent));
+
             return submenu;
         }
 
-        private ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler, bool isChecked = false)
+        void OnGitUserClick(object sender, EventArgs e)
         {
-            var item = new ToolStripMenuItem(displayText);
-            if (eventHandler != null) { item.Click += eventHandler; }
+            ConfigureForSingleUser(sender.ToString());
 
-            item.CheckState = isChecked ? CheckState.Checked : CheckState.Unchecked;
-           
-            return item;
+            if (optionsManager.KillSshAgent)
+                processKiller.KillSshAgent();
         }
 
-        private void OnGitUserClick(object sender, EventArgs e)
+        void ConfigureForSingleUser(string name)
         {
-            ConfigureForUser(sender.ToString());
+            var gitUser = gitUserManager.GetUserByName(name);
 
-            if (optionsController.KillSshAgent)
-            {
-                new ProcessKiller().KillSshAgent();
-            }
-        }
-
-        private void ConfigureForUser(string username)
-        {
             try
             {
-                gitUserManager.ConfigureForUser(username);
-                notifyIcon.Icon = iconRepository.GetIconForUser(gitUserManager.GetCurrentUser());
+                gitUserManager.ConfigureForSingleUser(gitUser);
+                notifyIcon.Icon = iconRepository.GetIconForUser(gitUser);
             }
             catch (FileNotFoundException)
             {
-                ShowErrorMessage("SSH key file could not be found at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
+                ShowErrorMessage("SSH key file could not be found at path: " + gitUser.SshKeyPath);
             }
             catch (DirectoryNotFoundException)
             {
-                ShowErrorMessage("SSH key file could not be found at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
+                ShowErrorMessage("SSH key file could not be found at path: " + gitUser.SshKeyPath);
             }
             catch (SshKeyHashException)
             {
-                ShowErrorMessage("SSH key file has changed at path: " + gitUserManager.GetUserByUsername(username).SshKeyPath);
-            }
-            catch (InvalidUserException)
-            {
-                ShowErrorMessage("Error loading user: " + username);
+                ShowErrorMessage("SSH key file has changed at path: " + gitUser.SshKeyPath);
             }
         }
 
-        private void ShowErrorMessage(string errorMessage)
+        void ShowErrorMessage(string errorMessage)
         {
             MessageBox.Show(errorMessage, "GitSwitch", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
-        private void OnEditUsers(object sender, EventArgs e)
+        void OnSelectMany(object sender, EventArgs e)
         {
-            if (editUsersForm == null)
+            if (selectManyUsersForm != null)
+            {
+                selectManyUsersForm.Activate();
+            }
+            else
+            {
+                selectManyUsersForm = new SelectManyUsersForm(gitUserManager, iconRepository, notifyIcon);
+                selectManyUsersForm.Closed += OnCloseSelectManyUsersForm;
+                selectManyUsersForm.Show();
+            }
+        }
+
+        void OnCloseSelectManyUsersForm(object sender, EventArgs e)
+        {
+            selectManyUsersForm = null;
+        }
+
+        void OnEditUsers(object sender, EventArgs e)
+        {
+            if (editUsersForm != null)
+            {
+                editUsersForm.Activate();
+            }
+            else
             {
                 editUsersForm = new EditUsersForm(gitUserManager);
                 editUsersForm.Closed += OnCloseEditUsersForm;
                 editUsersForm.Show();
             }
-            else
-            {
-                editUsersForm.Activate();
-            }
         }
 
-        private void OnCloseEditUsersForm(object sender, EventArgs e)
+        void OnCloseEditUsersForm(object sender, EventArgs e)
         {
             editUsersForm = null;
         }
 
-        private void OnLogout(object sender, EventArgs e)
+        void OnLogout(object sender, EventArgs e)
         {
-            gitUserManager.ConfigureForUser("");
+            gitUserManager.ConfigureForSingleUser(new NullGitUser());
             notifyIcon.Icon = defaultIcon;
         }
 
-        private void OnHelp(object sender, EventArgs e)
+        void OnHelp(object sender, EventArgs e)
         {
-            if (helpForm == null)
+            if (helpForm != null)
+            {
+                helpForm.Activate();
+            }
+            else
             {
                 helpForm = new HelpForm();
                 helpForm.Closed += OnCloseHelpForm;
                 helpForm.Show();
             }
-            else
-            {
-                helpForm.Activate();
-            }
         }
 
-        private void OnCloseHelpForm(object sender, EventArgs e)
+        void OnCloseHelpForm(object sender, EventArgs e)
         {
             helpForm = null;
         }
 
-        private void OnExit(object sender, EventArgs e)
+        void OnExit(object sender, EventArgs e)
         {
+            OnLogout(sender, e);
             ExitThread();
         }
 
@@ -168,9 +196,9 @@ namespace GitSwitch
             base.ExitThreadCore();
         }
 
-        private void OnKillSshAgent(object sender, EventArgs e)
+        void OnKillSshAgent(object sender, EventArgs e)
         {
-            optionsController.ToggleKillSshAgent();
+            optionsManager.ToggleKillSshAgent();
         }
     }
 }

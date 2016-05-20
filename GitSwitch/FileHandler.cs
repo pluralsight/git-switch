@@ -5,6 +5,15 @@ using System.Xml.Serialization;
 
 namespace GitSwitch
 {
+    public interface IFileHandler
+    {
+        T DeserializeFromFile<T>(string filePath);
+        void SerializeToFile<T>(string filePath, T TInput);
+        IEnumerable<string> ReadLines(string filePath);
+        void WriteFile(string filePath, string data);
+        bool DoesFileExist(string filePath);
+    }
+
     public class FileHandler : IFileHandler
     {
         public T DeserializeFromFile<T>(string filePath)

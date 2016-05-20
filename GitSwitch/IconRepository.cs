@@ -2,31 +2,37 @@
 
 namespace GitSwitch
 {
-    public class IconRepository
+    public interface IIconRepository
     {
-        private readonly IFileHandler fileHandler;
-        private readonly IIconDownloader iconDownloader;
+        Icon GetIconForUser(GitUser gitUser);
+    }
 
-        public IconRepository(IIconDownloader iconDownloader, IFileHandler fileHandler)
+    public class IconRepository : IIconRepository
+    {
+        readonly IIconDownloader iconDownloader;
+        readonly IFileHandler fileHandler;
+        readonly IGravatarUrlBuilder gravatarUrlBuilder;
+
+        public IconRepository(IIconDownloader iconDownloader, IFileHandler fileHandler, IGravatarUrlBuilder gravatarUrlBuilder)
         {
-            this.fileHandler = fileHandler;
             this.iconDownloader = iconDownloader;
-        }
-
-        public string GetIconFilePathForUser(GitUser gitUser)
-        {
-            var gravitarUrlBuilder = new GravatarUrlBuilder();
-            var fileName = string.Format("./{0}.jpg", gravitarUrlBuilder.HashEmail(gravitarUrlBuilder.NormalizeEmail(gitUser.Email)));
-
-            if (!fileHandler.DoesFileExist(fileName))
-                iconDownloader.DownloadIcon(gravitarUrlBuilder.GetUrlForEmail(gitUser.Email), fileName);
-
-            return fileName;
+            this.fileHandler = fileHandler;
+            this.gravatarUrlBuilder = gravatarUrlBuilder;
         }
 
         public Icon GetIconForUser(GitUser gitUser)
         {
             return Icon.FromHandle(new Bitmap(GetIconFilePathForUser(gitUser)).GetHicon());
+        }
+
+        internal string GetIconFilePathForUser(GitUser gitUser)
+        {
+            var fileName = string.Format("./{0}.jpg", gravatarUrlBuilder.HashEmail(gitUser.Email));
+
+            if (!fileHandler.DoesFileExist(fileName))
+                iconDownloader.DownloadIcon(gravatarUrlBuilder.GetUrlForEmail(gitUser.Email), fileName);
+
+            return fileName;
         }
     }
 }

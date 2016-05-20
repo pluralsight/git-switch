@@ -9,41 +9,41 @@ namespace UnitTests
     [TestFixture]
     class SshConfigEditorTests
     {
-        private const string TestKeyWindowsPath = @"C:\Users\fakeuser\.ssh\githubkey";
-        private const string TestKeyUnixPath = @"/C/Users/fakeuser/.ssh/githubkey";
-        
-        private SshConfigEditor editor;
-        private Mock<IFileHandler> mockFileHandler;
+        const string TestKeyWindowsPath = @"C:\Users\fakeuser\.ssh\githubkey";
+        const string TestKeyUnixPath = @"/C/Users/fakeuser/.ssh/githubkey";
+
+        SshConfigEditor classUnderTest;
+        Mock<IFileHandler> mockFileHandler;
 
         [SetUp]
         public void SetUp()
         {
             mockFileHandler = new Mock<IFileHandler>(MockBehavior.Strict);
 
-            editor = new SshConfigEditor(mockFileHandler.Object);
+            classUnderTest = new SshConfigEditor(mockFileHandler.Object);
         }
 
         [Test]
-        public void ItWritesANewFileIfOneWasNotFound()
+        public void SetGitHubKeyFile_WithMissingConfig_WritesANewFile()
         {
             string expectedData = "Host github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
-            
+
             mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Throws(new FileNotFoundException());
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string>((path, data) =>
                 {
-                    Assert.AreEqual(editor.SshConfigFilePath, path);
-                    Assert.AreEqual(expectedData, data);
+                    Assert.That(classUnderTest.SshConfigFilePath, Is.EqualTo(path));
+                    Assert.That(data, Is.EqualTo(expectedData));
                 });
 
-            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+            classUnderTest.SetGitHubKeyFile(TestKeyWindowsPath);
 
-            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
-            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+            mockFileHandler.Verify(mock => mock.ReadLines(classUnderTest.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(classUnderTest.SshConfigFilePath, expectedData));
         }
 
         [Test]
-        public void ItWritesANewFileIfTheConfigDirectoryWasNotFound()
+        public void SetGitHubKeyFile_WithMissingSshDirectory_WritesANewFile()
         {
             string expectedData = "Host github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
 
@@ -51,38 +51,38 @@ namespace UnitTests
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string>((path, data) =>
                 {
-                    Assert.AreEqual(editor.SshConfigFilePath, path);
-                    Assert.AreEqual(expectedData, data);
+                    Assert.That(classUnderTest.SshConfigFilePath, Is.EqualTo(path));
+                    Assert.That(data, Is.EqualTo(expectedData));
                 });
 
-            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+            classUnderTest.SetGitHubKeyFile(TestKeyWindowsPath);
 
-            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
-            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+            mockFileHandler.Verify(mock => mock.ReadLines(classUnderTest.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(classUnderTest.SshConfigFilePath, expectedData));
         }
 
         [Test]
-        public void ItAddsTheGitHubEntryIfItWasNotFound()
+        public void SetGitHubKeyFile_WithMissingGitHubEntry_AddsConfig()
         {
             List<string> priorConfigLines = GetExampleConfigLines();
             string expectedData = string.Join("\n", priorConfigLines) + "\nHost github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
-            
+
             mockFileHandler.Setup(mock => mock.ReadLines(It.IsAny<string>())).Returns(priorConfigLines);
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string>((path, data) =>
                 {
-                    Assert.AreEqual(editor.SshConfigFilePath, path);
-                    Assert.AreEqual(expectedData, data);
+                    Assert.That(classUnderTest.SshConfigFilePath, Is.EqualTo(path));
+                    Assert.That(data, Is.EqualTo(expectedData));
                 });
 
-            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+            classUnderTest.SetGitHubKeyFile(TestKeyWindowsPath);
 
-            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
-            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+            mockFileHandler.Verify(mock => mock.ReadLines(classUnderTest.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(classUnderTest.SshConfigFilePath, expectedData));
         }
 
         [Test]
-        public void ItChangesTheGitHubIdentityFile()
+        public void SetGitHubKeyFile_WithOldData_UpdatesGitHubIdentityFile()
         {
             List<string> priorConfigLines = GetExampleConfigLines("~/.ssh/oldGitHubKey");
             string expectedData = string.Join("\n", GetExampleConfigLines(TestKeyUnixPath));
@@ -91,18 +91,18 @@ namespace UnitTests
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string>((path, data) =>
                 {
-                    Assert.AreEqual(editor.SshConfigFilePath, path);
-                    Assert.AreEqual(expectedData, data);
+                    Assert.That(classUnderTest.SshConfigFilePath, Is.EqualTo(path));
+                    Assert.That(data, Is.EqualTo(expectedData));
                 });
 
-            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+            classUnderTest.SetGitHubKeyFile(TestKeyWindowsPath);
 
-            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
-            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+            mockFileHandler.Verify(mock => mock.ReadLines(classUnderTest.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(classUnderTest.SshConfigFilePath, expectedData));
         }
 
         [Test]
-        public void ItAddsANewLineToTheEndOfTheFileIfNecessary()
+        public void SetGitHubKeyFile_WithMissingNewlineEof_AddsANewLine()
         {
             List<string> priorConfigLines = GetExampleConfigLines("~/.ssh/oldGitHubKey", endWithNewLine: false);
             string expectedData = string.Join("\n", GetExampleConfigLines(TestKeyUnixPath));
@@ -111,19 +111,19 @@ namespace UnitTests
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string>((path, data) =>
                 {
-                    Assert.AreEqual(editor.SshConfigFilePath, path);
-                    Assert.AreEqual(expectedData, data);
+                    Assert.That(classUnderTest.SshConfigFilePath, Is.EqualTo(path));
+                    Assert.That(data, Is.EqualTo(expectedData));
                 });
 
-            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+            classUnderTest.SetGitHubKeyFile(TestKeyWindowsPath);
 
-            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
-            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+            mockFileHandler.Verify(mock => mock.ReadLines(classUnderTest.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(classUnderTest.SshConfigFilePath, expectedData));
         }
 
         [TestCase("")]
         [TestCase(null)]
-        public void ItAllowsANullOrEmptySshKeyString(string sshKey)
+        public void SetGitHubKeyFile_AllowsANullOrEmptySshKeyString(string sshKey)
         {
             List<string> priorConfigLines = GetExampleConfigLines("~/.ssh/oldGitHubKey");
             string expectedData = string.Join("\n", GetExampleConfigLines(""));
@@ -132,18 +132,18 @@ namespace UnitTests
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string>((path, data) =>
                 {
-                    Assert.AreEqual(editor.SshConfigFilePath, path);
-                    Assert.AreEqual(expectedData, data);
+                    Assert.That(classUnderTest.SshConfigFilePath, Is.EqualTo(path));
+                    Assert.That(data, Is.EqualTo(expectedData));
                 });
 
-            editor.SetGitHubKeyFile(sshKey);
+            classUnderTest.SetGitHubKeyFile(sshKey);
 
-            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
-            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+            mockFileHandler.Verify(mock => mock.ReadLines(classUnderTest.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(classUnderTest.SshConfigFilePath, expectedData));
         }
 
         [Test]
-        public void ItHandlesTheCaseOfAnEmptyConfigFile()
+        public void SetGitHubKeyFile_HandlesEmptyConfigFile()
         {
             List<string> priorConfigLines = new List<string>();
             string expectedData = "Host github.com\n\tIdentityFile " + TestKeyUnixPath + "\n";
@@ -152,17 +152,17 @@ namespace UnitTests
             mockFileHandler.Setup(mock => mock.WriteFile(It.IsAny<string>(), It.IsAny<string>()))
                 .Callback<string, string>((path, data) =>
                 {
-                    Assert.AreEqual(editor.SshConfigFilePath, path);
-                    Assert.AreEqual(expectedData, data);
+                    Assert.That(classUnderTest.SshConfigFilePath, Is.EqualTo(path));
+                    Assert.That(data, Is.EqualTo(expectedData));
                 });
 
-            editor.SetGitHubKeyFile(TestKeyWindowsPath);
+            classUnderTest.SetGitHubKeyFile(TestKeyWindowsPath);
 
-            mockFileHandler.Verify(mock => mock.ReadLines(editor.SshConfigFilePath));
-            mockFileHandler.Verify(mock => mock.WriteFile(editor.SshConfigFilePath, expectedData));
+            mockFileHandler.Verify(mock => mock.ReadLines(classUnderTest.SshConfigFilePath));
+            mockFileHandler.Verify(mock => mock.WriteFile(classUnderTest.SshConfigFilePath, expectedData));
         }
 
-        private List<string> GetExampleConfigLines(string gitHubKey = null, bool endWithNewLine = true)
+        List<string> GetExampleConfigLines(string gitHubKey = null, bool endWithNewLine = true)
         {
             var lines = new List<string>();
 
@@ -179,10 +179,9 @@ namespace UnitTests
 
             lines.Add("Host example.com");
             lines.Add("\tStrictHostKeyChecking no");
+
             if (endWithNewLine)
-            {
                 lines.Add("");
-            }
 
             return lines;
         }
