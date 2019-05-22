@@ -5,6 +5,7 @@ namespace GitSwitch
     public interface IOptionsManager
     {
         bool KillSshAgent { get; }
+        string UsersFile { get; }
         void ToggleKillSshAgent();
     }
 
@@ -22,6 +23,11 @@ namespace GitSwitch
         public bool KillSshAgent
         {
             get { return CurrentOptions.KillSshAgent; }
+        }
+
+        public string UsersFile
+        {
+            get { return CurrentOptions.UsersFile; }
         }
 
         GitSwitchOptions CurrentOptions
@@ -45,7 +51,8 @@ namespace GitSwitch
             {
                 currentOptions = new GitSwitchOptions
                 {
-                    KillSshAgent = false
+                    KillSshAgent = false,
+                    UsersFile = AppConstants.UsersFile
                 };
             }
         }

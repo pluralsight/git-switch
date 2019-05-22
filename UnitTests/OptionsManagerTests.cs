@@ -17,7 +17,7 @@ namespace UnitTests
         public void SetUp()
         {
             mockFileHandler = new Mock<IFileHandler>();
-            expectedOptions = new GitSwitchOptions { KillSshAgent = true };
+            expectedOptions = new GitSwitchOptions { KillSshAgent = true, UsersFile = "path/to/file.xml" };
 
             classUnderTest = new OptionsManager(mockFileHandler.Object);
         }
@@ -28,6 +28,7 @@ namespace UnitTests
             mockFileHandler.Setup(mock => mock.DeserializeFromFile<GitSwitchOptions>(AppConstants.OptionsFile)).Throws(new FileNotFoundException());
 
             Assert.That(classUnderTest.KillSshAgent, Is.False);
+            Assert.That(classUnderTest.UsersFile, Is.EqualTo(AppConstants.UsersFile));
         }
 
         [Test]
@@ -36,6 +37,7 @@ namespace UnitTests
             mockFileHandler.Setup(mock => mock.DeserializeFromFile<GitSwitchOptions>(AppConstants.OptionsFile)).Returns(expectedOptions);
 
             Assert.That(classUnderTest.KillSshAgent, Is.EqualTo(expectedOptions.KillSshAgent));
+            Assert.That(classUnderTest.UsersFile, Is.EqualTo(expectedOptions.UsersFile));
             mockFileHandler.Verify(mock => mock.DeserializeFromFile<GitSwitchOptions>(AppConstants.OptionsFile));
         }
 

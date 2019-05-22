@@ -11,6 +11,7 @@ namespace UnitTests
     public class GitUserManagerTests
     {
         GitUserManager classUnderTest;
+        Mock<IOptionsManager> mockOptionsManager;
         Mock<IFileHandler> mockFileHandler;
         Mock<IFileHasher> mockFileHasher;
         Mock<IGitConfigEditor> mockGitConfigEditor;
@@ -21,15 +22,16 @@ namespace UnitTests
         [SetUp]
         public void SetUp()
         {
+            mockOptionsManager = new Mock<IOptionsManager>();
             mockFileHandler = new Mock<IFileHandler>();
             mockFileHasher = new Mock<IFileHasher>();
             mockGitConfigEditor = new Mock<IGitConfigEditor>();
             mockSshConfigEditor = new Mock<ISshConfigEditor>();
             testUser = new GitUser("Test User", "test@example.com", @"c:\fake-key");
 
-            mockFileHandler.Setup(mock => mock.DeserializeFromFile<List<GitUser>>(AppConstants.UsersFile)).Throws(new FileNotFoundException());
+            mockFileHandler.Setup(mock => mock.DeserializeFromFile<List<GitUser>>(It.IsAny<string>())).Throws(new FileNotFoundException());
 
-            classUnderTest = new GitUserManager(mockFileHandler.Object, mockFileHasher.Object, mockGitConfigEditor.Object, mockSshConfigEditor.Object);
+            classUnderTest = new GitUserManager(mockOptionsManager.Object, mockFileHandler.Object, mockFileHasher.Object, mockGitConfigEditor.Object, mockSshConfigEditor.Object);
         }
 
         [Test]
@@ -46,6 +48,19 @@ namespace UnitTests
             Assert.That(classUnderTest.Users.Count, Is.EqualTo(0));
 
             mockFileHandler.Setup(mock => mock.DeserializeFromFile<List<GitUser>>(AppConstants.UsersFile)).Returns(new List<GitUser> { testUser });
+
+            Assert.That(classUnderTest.Users.Count, Is.EqualTo(1));
+            Assert.That(classUnderTest.GetUserByName(testUser.Name), Is.SameAs(testUser));
+            Assert.That(classUnderTest.ActiveUsers, Is.Empty);
+        }
+
+        [Test]
+        public void Users_CanBeLoadedFromCustomFilePath()
+        {
+            Assert.That(classUnderTest.Users.Count, Is.EqualTo(0));
+
+            mockOptionsManager.Setup(mock => mock.UsersFile).Returns("path/to/file.xml");
+            mockFileHandler.Setup(mock => mock.DeserializeFromFile<List<GitUser>>("path/to/file.xml")).Returns(new List<GitUser> { testUser });
 
             Assert.That(classUnderTest.Users.Count, Is.EqualTo(1));
             Assert.That(classUnderTest.GetUserByName(testUser.Name), Is.SameAs(testUser));

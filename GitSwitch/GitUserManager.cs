@@ -19,6 +19,7 @@ namespace GitSwitch
 
     public class GitUserManager : IGitUserManager
     {
+        readonly IOptionsManager optionsManager;
         readonly IFileHandler fileHandler;
         readonly IFileHasher fileHasher;
         readonly IGitConfigEditor gitConfigEditor;
@@ -28,8 +29,9 @@ namespace GitSwitch
         readonly List<GitUser> activeUsers;
         bool hasLoadedUsers;
 
-        public GitUserManager(IFileHandler fileHandler, IFileHasher fileHasher, IGitConfigEditor gitConfigEditor, ISshConfigEditor sshConfigEditor)
+        public GitUserManager(IOptionsManager optionsManager, IFileHandler fileHandler, IFileHasher fileHasher, IGitConfigEditor gitConfigEditor, ISshConfigEditor sshConfigEditor)
         {
+            this.optionsManager = optionsManager;
             this.fileHandler = fileHandler;
             this.fileHasher = fileHasher;
             this.gitConfigEditor = gitConfigEditor;
@@ -59,7 +61,7 @@ namespace GitSwitch
         {
             try
             {
-                fileHandler.DeserializeFromFile<List<GitUser>>(AppConstants.UsersFile).ForEach(u => availableUsers.Add(u));
+                fileHandler.DeserializeFromFile<List<GitUser>>(GetUsersFilePath()).ForEach(u => availableUsers.Add(u));
                 hasLoadedUsers = true;
             }
             catch (FileNotFoundException)
@@ -85,7 +87,7 @@ namespace GitSwitch
 
         void SaveToFile()
         {
-            fileHandler.SerializeToFile(AppConstants.UsersFile, Users);
+            fileHandler.SerializeToFile(GetUsersFilePath(), Users);
         }
 
         public GitUser GetUserByName(string name)
@@ -143,6 +145,11 @@ namespace GitSwitch
         {
             MakeUserActive(user, isPairOrMob: false);
             ConfigureForActiveUsers();
+        }
+
+        string GetUsersFilePath()
+        {
+            return string.IsNullOrWhiteSpace(optionsManager.UsersFile) ? AppConstants.UsersFile : optionsManager.UsersFile;
         }
     }
 }
